@@ -241,7 +241,7 @@ export default function Chat() {
             {isDM && (
               <Badge className="text-xs bg-primary/10 text-primary border-primary/20">
                 <ScrollText className="w-3 h-3 mr-1" />
-                Viejo Greg
+                Dungeon Master
               </Badge>
             )}
             {isSystem && <Badge variant="destructive" className="text-xs">Sistema</Badge>}
@@ -249,9 +249,35 @@ export default function Chat() {
 
           {/* Content - render markdown for DM messages */}
           <div className={`text-sm leading-relaxed ${isDM ? 'dm-narrative' : 'whitespace-pre-wrap'}`}>
-            {isDM ? (
-              <ReactMarkdown>{msg.content}</ReactMarkdown>
-            ) : (
+            {isDM ? (() => {
+              const parts = msg.content.split(/OPCIONES SUGERIDAS:/);
+              const mainText = parts[0].trim();
+              const optionsText = parts[1] || '';
+              const options = optionsText
+                .split(/\n/)
+                .map(l => l.trim())
+                .filter(l => /^[1-5][\.\)]/.test(l))
+                .map(l => l.replace(/^[1-5][\.\)]\s*/, ''));
+              return (
+                <>
+                  <ReactMarkdown>{mainText}</ReactMarkdown>
+                  {options.length > 0 && (
+                    <div className="mt-3 space-y-1">
+                      <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wide mb-2">Opciones sugeridas</p>
+                      {options.map((opt, i) => (
+                        <button
+                          key={i}
+                          onClick={() => setInput(opt)}
+                          className="block w-full text-left text-xs px-3 py-2 rounded-lg border border-border hover:bg-primary/10 hover:border-primary/40 transition-colors text-muted-foreground hover:text-foreground"
+                        >
+                          <span className="font-bold text-primary mr-2">{i + 1}.</span>{opt}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </>
+              );
+            })() : (
               msg.content
             )}
           </div>
