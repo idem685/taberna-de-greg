@@ -231,7 +231,9 @@ const BaseIntentionSchema = z.object({
 });
 
 /** combat_attack: target required, damageRoll validated */
-const CombatAttackIntentionSchema = BaseIntentionSchema.extend({
+const CombatAttackIntentionSchema = z.object({
+  type: z.literal('combat_attack'),
+  description: z.string().trim().min(1).max(500),
   target: z.string().trim().min(1).max(100).optional(),
   damageRoll: DiceNotation.optional(),
   damageType: DamageTypeSchema.optional(),
@@ -247,7 +249,9 @@ const CombatAttackIntentionSchema = BaseIntentionSchema.extend({
 });
 
 /** combat_defend: savingThrowAbility or just defensive stance */
-const CombatDefendIntentionSchema = BaseIntentionSchema.extend({
+const CombatDefendIntentionSchema = z.object({
+  type: z.literal('combat_defend'),
+  description: z.string().trim().min(1).max(500),
   savingThrowAbility: AbilityScoreSchema.optional(),
   dc: DifficultyClass.optional(),
   damageToPlayer: DamageAmount.optional(),
@@ -257,7 +261,9 @@ const CombatDefendIntentionSchema = BaseIntentionSchema.extend({
 });
 
 /** skill_check: skill required, dc required */
-const SkillCheckIntentionSchema = BaseIntentionSchema.extend({
+const SkillCheckIntentionSchema = z.object({
+  type: z.literal('skill_check'),
+  description: z.string().trim().min(1).max(500),
   skill: SkillKeySchema.optional(),
   dc: DifficultyClass.optional(),
   xpReward: XPAmount.optional(),
@@ -268,7 +274,9 @@ const SkillCheckIntentionSchema = BaseIntentionSchema.extend({
 });
 
 /** npc_reaction: npcId or newNPC required */
-const NPCReactionIntentionSchema = BaseIntentionSchema.extend({
+const NPCReactionIntentionSchema = z.object({
+  type: z.literal('npc_reaction'),
+  description: z.string().trim().min(1).max(500),
   npcId: z.string().trim().max(100).optional(),
   reputationDelta: ReputationDelta.optional(),
   newNPC: NPCSchema.optional(),
@@ -276,7 +284,9 @@ const NPCReactionIntentionSchema = BaseIntentionSchema.extend({
 });
 
 /** quest_progress: questId or newQuest required */
-const QuestProgressIntentionSchema = BaseIntentionSchema.extend({
+const QuestProgressIntentionSchema = z.object({
+  type: z.literal('quest_progress'),
+  description: z.string().trim().min(1).max(500),
   questId: z.string().trim().max(100).optional(),
   newQuest: QuestSchema.optional(),
   questUpdates: z.record(z.string(), z.unknown()).optional(),
@@ -285,34 +295,44 @@ const QuestProgressIntentionSchema = BaseIntentionSchema.extend({
 });
 
 /** time_advance */
-const TimeAdvanceIntentionSchema = BaseIntentionSchema.extend({
+const TimeAdvanceIntentionSchema = z.object({
+  type: z.literal('time_advance'),
+  description: z.string().trim().min(1).max(500),
   location: z.string().trim().max(100).optional(),
   timeOfDay: z.string().trim().max(50).optional(),
   daysAdvance: z.number().int().min(0).max(365).optional(),
 });
 
 /** loot_attempt: lootItems and/or lootCurrency */
-const LootAttemptIntentionSchema = BaseIntentionSchema.extend({
+const LootAttemptIntentionSchema = z.object({
+  type: z.literal('loot_attempt'),
+  description: z.string().trim().min(1).max(500),
   lootItems: z.array(LootItemSchema).max(20).optional(),
   lootCurrency: CurrencySchema.optional(),
   xpReward: XPAmount.optional(),
 });
 
 /** escape_attempt: dc required */
-const EscapeAttemptIntentionSchema = BaseIntentionSchema.extend({
+const EscapeAttemptIntentionSchema = z.object({
+  type: z.literal('escape_attempt'),
+  description: z.string().trim().min(1).max(500),
   dc: DifficultyClass.optional(),
   damageToPlayer: DamageAmount.optional(),
 });
 
 /** dialogue_trigger: npcId and dialogueText */
-const DialogueTriggerIntentionSchema = BaseIntentionSchema.extend({
+const DialogueTriggerIntentionSchema = z.object({
+  type: z.literal('dialogue_trigger'),
+  description: z.string().trim().min(1).max(500),
   npcId: z.string().trim().max(100).optional(),
   dialogueText: z.string().trim().max(2000).optional(),
   newNPC: NPCSchema.optional(),
 });
 
 /** environment_effect */
-const EnvironmentEffectIntentionSchema = BaseIntentionSchema.extend({
+const EnvironmentEffectIntentionSchema = z.object({
+  type: z.literal('environment_effect'),
+  description: z.string().trim().min(1).max(500),
   savingThrowAbility: AbilityScoreSchema.optional(),
   dc: DifficultyClass.optional(),
   damageToPlayer: DamageAmount.optional(),
@@ -321,12 +341,15 @@ const EnvironmentEffectIntentionSchema = BaseIntentionSchema.extend({
 });
 
 /** rest_attempt */
-const RestAttemptIntentionSchema = BaseIntentionSchema.extend({
-  // No extra fields — just a description of the rest type
+const RestAttemptIntentionSchema = z.object({
+  type: z.literal('rest_attempt'),
+  description: z.string().trim().min(1).max(500),
 });
 
 /** death_event: deathEntry required */
-const DeathEventIntentionSchema = BaseIntentionSchema.extend({
+const DeathEventIntentionSchema = z.object({
+  type: z.literal('death_event'),
+  description: z.string().trim().min(1).max(500),
   deathEntry: DeathEntrySchema.optional(),
 });
 
