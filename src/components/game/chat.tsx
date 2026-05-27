@@ -38,6 +38,7 @@ interface DMApiResponse {
 
 export default function Chat() {
   const [input, setInput] = useState('');
+  const [suggestedOptions, setSuggestedOptions] = useState<string[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -72,6 +73,7 @@ export default function Chat() {
 
     const playerMessage = input.trim();
     setInput('');
+    setSuggestedOptions([]);
 
     // Add player message
     addChatMessage({
@@ -129,7 +131,7 @@ export default function Chat() {
       // The response from /api/dm is already validated through the Zod pipeline.
       // narrative is guaranteed to be a non-empty string.
       // intentions is guaranteed to be an array of valid Intention objects.
-      const { narrative: dmNarrative, intentions } = data;
+      const { narrative: dmNarrative, intentions, options: dmOptions } = data as typeof data & { options?: string[] };
 
       // Store raw intentions for debug panel
       if (typeof window !== 'undefined' && intentions) {
@@ -156,6 +158,8 @@ export default function Chat() {
           content: dmNarrative,
         });
       }
+      // Update suggested options (from either path)
+      setSuggestedOptions(dmOptions ?? []);
     } catch (error: unknown) {
       console.error('DM communication error:', error);
       // Store error for debug panel
@@ -249,35 +253,9 @@ export default function Chat() {
 
           {/* Content - render markdown for DM messages */}
           <div className={`text-sm leading-relaxed ${isDM ? 'dm-narrative' : 'whitespace-pre-wrap'}`}>
-            {isDM ? (() => {
-              const parts = msg.content.split(/OPCIONES SUGERIDAS:/);
-              const mainText = parts[0].trim();
-              const optionsText = parts[1] || '';
-              const options = optionsText
-                .split(/\n/)
-                .map(l => l.trim())
-                .filter(l => /^[1-5][\.\)]/.test(l))
-                .map(l => l.replace(/^[1-5][\.\)]\s*/, ''));
-              return (
-                <>
-                  <ReactMarkdown>{mainText}</ReactMarkdown>
-                  {options.length > 0 && (
-                    <div className="mt-3 space-y-1">
-                      <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wide mb-2">Opciones sugeridas</p>
-                      {options.map((opt, i) => (
-                        <button
-                          key={i}
-                          onClick={() => setInput(opt)}
-                          className="block w-full text-left text-xs px-3 py-2 rounded-lg border border-border hover:bg-primary/10 hover:border-primary/40 transition-colors text-muted-foreground hover:text-foreground"
-                        >
-                          <span className="font-bold text-primary mr-2">{i + 1}.</span>{opt}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </>
-              );
-            })() : (
+            {isDM ? (
+              <ReactMarkdown>{msg.content}</ReactMarkdown>
+            ) : (
               msg.content
             )}
           </div>
@@ -354,6 +332,22 @@ export default function Chat() {
           </div>
         )}
       </div>
+
+      {/* Suggested options */}
+      {suggestedOptions.length > 0 && (
+        <div className="px-3 py-2 border-t bg-card/30 space-y-1">
+          <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wide mb-1">Opciones sugeridas</p>
+          {suggestedOptions.map((opt, i) => (
+            <button
+              key={i}
+              onClick={() => setInput(opt)}
+              className="block w-full text-left text-xs px-3 py-2 rounded-lg border border-border hover:bg-primary/10 hover:border-primary/40 transition-colors text-muted-foreground hover:text-foreground"
+            >
+              <span className="font-bold text-primary mr-2">{i + 1}.</span>{opt}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* Input area */}
       <div className="p-3 border-t bg-card/50">
