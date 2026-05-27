@@ -1,18 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 // AI client using Google Gemini (free tier) via OpenAI-compatible API
 async function callGemini(messages: Array<{ role: string; content: string }>, temperature: number, max_tokens: number): Promise<string> {
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) throw new Error('GEMINI_API_KEY no configurada en las variables de entorno');
+  const apiKey = process.env.GROQ_API_KEY;
+  if (!apiKey) throw new Error('GROQ_API_KEY no configurada en las variables de entorno');
 
-  // Gemini OpenAI-compatible endpoint
-  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/openai/chat/completions`, {
+  const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
-      model: 'gemini-2.0-flash',
+      model: 'llama-3.3-70b-versatile',
       messages,
       temperature,
       max_tokens,
@@ -21,7 +20,7 @@ async function callGemini(messages: Array<{ role: string; content: string }>, te
 
   if (!response.ok) {
     const err = await response.text();
-    throw new Error(`Gemini API error ${response.status}: ${err}`);
+    throw new Error(`Groq API error ${response.status}: ${err}`);
   }
 
   const data = await response.json() as { choices: Array<{ message: { content: string } }> };
