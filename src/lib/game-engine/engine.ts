@@ -94,6 +94,7 @@ import {
   type TimeOfDay,
 } from './world-time';
 import { createDefaultConsequenceState } from '@/lib/consequences/types';
+import { resolveIntentions as resolveIntentionsImpl, type IntentionsResolutionResult } from './intention-resolver';
 
 // --- GameEngine Result ---
 
@@ -698,8 +699,7 @@ export class GameEngine {
     resolutionSummary: string;
   } {
     // Delegate to the intention-resolver module
-    const { resolveIntentions } = require('./intention-resolver') as typeof import('./intention-resolver');
-    const result = resolveIntentions(state, intentions);
+    const result = resolveIntentionsImpl(state, intentions);
 
     return {
       state: result.state,
